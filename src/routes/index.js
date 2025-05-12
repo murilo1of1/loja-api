@@ -1,9 +1,13 @@
-import clienteRoute from "./clienteRoute.js";
-import livroRoute from "./livroRoute.js";
+import productRoute from "./productRoute.js";
+import cupomRoute from "./cupomRoute.js";
+import categoryRoute from "./categoryRoute.js";
+import userRoute from "./userRoute.js";
 
 function Routes(app) {
-  livroRoute(app);
-  clienteRoute(app);
+  productRoute(app);
+  cupomRoute(app);
+  categoryRoute(app); 
+  userRoute(app);
 }
 
 export default Routes;

@@ -8,7 +8,7 @@
 ## Coloque no .env
 
 ```js
-  API_PORT=3333
+  API_PORT=3330
   POSTGRES_DB=teste_banco_legal
   POSTGRES_USERNAME=postgres
   POSTGRES_PASSWORD=unochapeco
