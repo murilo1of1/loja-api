@@ -231,7 +231,7 @@ const login = async (req, res) => {
         const comparacaoSenha = await bcrypt.compare(password, user.passwordHash);
 
         if (comparacaoSenha) {
-            const token = jwt.sign( {idUsuario: user.id, nome: user.name, cargo: user.role, email: user.email}, process.env.TOKEN_KEY, { expiresIn: '8h'});    
+            const token = jwt.sign( {idUsuario: user.id, nome: user.name, role: user.role, email: user.email}, process.env.TOKEN_KEY, { expiresIn: '8h'});    
             return res.status(200).send({
                 message: 'Sucesso',
                 response: token
