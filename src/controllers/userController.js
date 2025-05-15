@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import sendMail from '../utils/email.js';
 import { Op } from 'sequelize';
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';  
+import crypto from 'crypto';
 
 const get = async (req, res) => {
     try {
@@ -97,66 +97,66 @@ const update = async (corpo, id) => {
 
 const persist = async (req, res) => {
     try {
-      const id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
-  
-      if (!id) {
-        const response = await create(req.body);
+        const id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
+
+        if (!id) {
+            const response = await create(req.body);
+            return res.status(201).send({
+                message: 'criado com sucesso!',
+                data: response
+            });
+        }
+
+        const response = await update(req.body, id);
         return res.status(201).send({
-          message: 'criado com sucesso!',
-          data: response
+            message: 'atualizado com sucesso!',
+            data: response
         });
-      }
-  
-      const response = await update(req.body, id);
-      return res.status(201).send({
-        message: 'atualizado com sucesso!',
-        data: response
-      });
     } catch (error) {
-      return res.status(500).send({
-        message: error.message
-      });
+        return res.status(500).send({
+            message: error.message
+        });
     }
 };
 
 const destroy = async (req, res) => {
     try {
-      const id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
-      if (!id) {
-        return res.status(400).send('informa ai paezao')
-      }
-  
-      const response = await User.findOne({
-        where: {
-          id
+        const id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
+        if (!id) {
+            return res.status(400).send('informa ai paezao')
         }
-      });
-  
-      if (!response) {
-        return res.status(404).send('nao achou');
-      }
-  
-      await response.destroy();
-  
-      return res.status(200).send({
-        message: 'registro excluido',
-        data: response
-      });
-    } catch (error) {
-      return res.status(500).send({
-        message: error.message
-      });
-    }
-  }
 
-  const forgotPassword = async (req, res) => {
+        const response = await User.findOne({
+            where: {
+                id
+            }
+        });
+
+        if (!response) {
+            return res.status(404).send('nao achou');
+        }
+
+        await response.destroy();
+
+        return res.status(200).send({
+            message: 'registro excluido',
+            data: response
+        });
+    } catch (error) {
+        return res.status(500).send({
+            message: error.message
+        });
+    }
+}
+
+const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
         const user = await User.findOne({ where: { email } });
 
         if (user) {
             const resetToken = crypto.randomBytes(20).toString('hex');
-            const resetPasswordExpires = Date.now() + 30 * 60 * 1000; 
+            const resetPasswordExpires = Date.now() + 30 * 60 * 1000;
 
             await User.update(
                 { resetPasswordToken: resetToken, resetPasswordExpires: resetPasswordExpires },
@@ -171,7 +171,7 @@ const destroy = async (req, res) => {
                 html: `<p>Você solicitou a recuperação de sua senha. Seu código temporário é: <strong>${resetToken}</strong>. Ele expirará em 30 minutos.</p>`,
             };
 
-            await sendMail(mailOptions.to, mailOptions.name, mailOptions.html, mailOptions.subject); 
+            await sendMail(mailOptions.to, mailOptions.name, mailOptions.html, mailOptions.subject);
 
             return res.status(200).send({ message: 'Um e-mail com as instruções de recuperação foi enviado (se o e-mail existir em nosso sistema).' });
         } else {
@@ -221,31 +221,36 @@ const login = async (req, res) => {
                 email
             }
         });
-        
+
         if (!user) {
             return res.status(400).send({
                 message: "usuario ou senha incorretos"
             });
         }
-        
+
         const comparacaoSenha = await bcrypt.compare(password, user.passwordHash);
 
         if (comparacaoSenha) {
-            const token = jwt.sign( {idUsuario: user.id, nome: user.name, role: user.role, email: user.email}, process.env.TOKEN_KEY, { expiresIn: '8h'});    
+            const token = jwt.sign({
+                idUsuario: user.id,
+                nome: user.name,
+                role: user.role,
+                email: user.email
+            }, process.env.TOKEN_KEY, { expiresIn: '8h' });
             return res.status(200).send({
                 message: 'Sucesso',
                 response: token
             })
-        }else{
+        } else {
             return res.status(400).send({
                 message: "usuario ou senha incorretos"
             });
         }
- 
+
     } catch (error) {
-        throw new Error(error.message);    
+        throw new Error(error.message);
     }
-}; 
+};
 
 const getDataByToken = async (req, res) => {
     try {
@@ -258,20 +263,21 @@ const getDataByToken = async (req, res) => {
         }
 
         const user = jwt.verify(token, process.env.TOKEN_KEY);
-        
+
         const usuario = await User.findOne({
-            where: { id: user.idUsuario }});
+            where: { id: user.idUsuario }
+        });
 
         if (!usuario) {
             return res.status(404).send({ message: 'Usuário não encontrado' });
         }
-        
+
         return res.status(200).send({
-            response: usuario.toJSON()   
+            response: usuario.toJSON()
         })
 
     } catch (error) {
-        throw new Error(error.message);    
+        throw new Error(error.message);
     }
 };
 

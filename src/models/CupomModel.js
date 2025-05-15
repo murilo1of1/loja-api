@@ -18,7 +18,7 @@ const Cupom = sequelize.define(
         allowNull: false,   
     },
     value: {
-      type: DataTypes.FLOAT(15, 2),
+      type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
     },
     uses: {

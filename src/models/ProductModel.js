@@ -15,7 +15,7 @@ const Product = sequelize.define(
       allowNull: false,
     },
     price: {
-      type: DataTypes.FLOAT(15, 2),
+      type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
     },
     image: {
