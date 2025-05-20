@@ -14,7 +14,8 @@ const Order = sequelize.define(
       autoIncrement: true,
     },
     status: {
-        type: DataTypes.ENUM('pending', 'completed', 'cancelled'),
+        type: DataTypes.ENUM('pending', 'completed', 'cancelled', 'in_delivery'),
+        defaultValue: 'pending',
         allowNull: true
     },
     total: {

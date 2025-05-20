@@ -9,7 +9,7 @@
 
 ```js
   API_PORT=3330
-  POSTGRES_DB=teste_banco_legal
+  POSTGRES_DB=banco_loja
   POSTGRES_USERNAME=postgres
   POSTGRES_PASSWORD=unochapeco
   POSTGRES_HOST=localhost
