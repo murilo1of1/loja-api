@@ -51,9 +51,9 @@ const User = sequelize.define(
       allowNull: true,
     },
     role: {
-      type: DataTypes.ENUM('admin', 'entregador', 'usuario'),
+      type: DataTypes.ENUM('admin', 'delivery', 'user'),
       allowNull: false,
-      defaultValue: 'usuario',
+      defaultValue: 'user',
     },
     cart: {
       type: DataTypes.JSON,
