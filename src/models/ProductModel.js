@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/postgres.js";
 import Category from "./CategoryModel.js";
+import User from "./UserModel.js";
 
 const Product = sequelize.define(
   'products',
