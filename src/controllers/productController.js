@@ -86,6 +86,7 @@ const update = async (corpo, id) => {
 const persist = async (req, res) => {
   try {
     const id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
 
     if (!id) {
       const data = { ...req.body, image: null };
@@ -99,10 +100,9 @@ const persist = async (req, res) => {
           fs.mkdirSync(uploadDir, { recursive: true });
         }
         const fileName = `product_${response.id}${ext}`;
-        const imagePath = `${fileName}`;
         await image.mv(path.join(uploadDir, fileName));
 
-        response.image = imagePath;
+        response.image = `${baseUrl}/${fileName}`;
         await response.save();
       }
 
@@ -121,8 +121,8 @@ const persist = async (req, res) => {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
       const fileName = `product_${id}${ext}`;
-      imagePath = `${fileName}`;
       await image.mv(path.join(uploadDir, fileName));
+      imagePath = `${baseUrl}/${fileName}`;
     }
 
     const data = {
