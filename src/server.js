@@ -7,6 +7,7 @@ import cors from 'cors'
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import './models/index.js';
+import fileupload from 'express-fileupload';
 
 import Routes from './routes/index.js';
 import { sequelize } from './config/postgres.js';
@@ -32,6 +33,12 @@ app.use(cors(corsOptions));
 app.use(morgan('combined', { stream: logStream }));
 app.use(express.json({ limit: '50mb'}));
 app.use(express.urlencoded({ extended: true, limit: '50mb'}));
+
+app.use(fileupload({
+  createParentPath: true,
+}));
+
+app.use(express.static('public'));
 
 Routes(app);
 app.use((req, res) => {

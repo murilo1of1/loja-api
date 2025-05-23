@@ -1,4 +1,6 @@
 import Product from '../models/ProductModel.js';
+import path from 'path';
+import fs from 'fs';
 
 const get = async (req, res) => {
   try {
@@ -82,28 +84,62 @@ const update = async (corpo, id) => {
 }
 
 const persist = async (req, res) => {
-    try {
-      const id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
-  
-      if (!id) {
-        const response = await create(req.body);
-        return res.status(201).send({
-          message: 'criado com sucesso!',
-          data: response
-        });
+  try {
+    const id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
+
+    if (!id) {
+      const data = { ...req.body, image: null };
+      const response = await create(data);
+
+      if (req.files && req.files.image) {
+        const image = req.files.image;
+        const ext = path.extname(image.name);
+        const uploadDir = path.join(process.cwd(), 'public');
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        const fileName = `product_${response.id}${ext}`;
+        const imagePath = `${fileName}`;
+        await image.mv(path.join(uploadDir, fileName));
+
+        response.image = imagePath;
+        await response.save();
       }
-  
-      const response = await update(req.body, id);
+
       return res.status(201).send({
-        message: 'atualizado com sucesso!',
+        message: 'criado com sucesso!',
         data: response
       });
-    } catch (error) {
-      return res.status(500).send({
-        message: error.message
-      });
     }
+
+    let imagePath = null;
+    if (req.files && req.files.image) {
+      const image = req.files.image;
+      const ext = path.extname(image.name);
+      const uploadDir = path.join(process.cwd(), 'public');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      const fileName = `product_${id}${ext}`;
+      imagePath = `${fileName}`;
+      await image.mv(path.join(uploadDir, fileName));
+    }
+
+    const data = {
+      ...req.body,
+      ...(imagePath && { image: imagePath })
+    };
+    const response = await update(data, id);
+    return res.status(201).send({
+      message: 'atualizado com sucesso!',
+      data: response
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: error.message
+    });
   }
+}
 
 const destroy = async (req, res) => {
   try {
