@@ -1,9 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/postgres.js";
-import Category from "./CategoryModel.js";
 
-const Product = sequelize.define(
-  'products',
+const Drink = sequelize.define(
+  'drinks',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -21,10 +20,6 @@ const Product = sequelize.define(
     image: {
       type: DataTypes.STRING(2000),
       allowNull: true,
-    },      
-    description: {
-      type: DataTypes.STRING(2000),
-      allowNull: true,
     },
   },
   {
@@ -35,15 +30,4 @@ const Product = sequelize.define(
   }
 );
 
-Product.belongsTo(Category, {
-  as: 'category',
-  onUpdate: 'NO ACTION',
-  onDelete: 'NO ACTION',
-  foreignKey: {
-    name: 'idCategory',
-    allowNull: false,
-    field: 'id_category',
-  }
-});
-
-export default Product;
+export default Drink;

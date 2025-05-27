@@ -1,6 +1,8 @@
 import Order from '../models/OrderModel.js';
 import OrderProduct from '../models/OrderProductModel.js';
 import Product from '../models/ProductModel.js';
+import Drink from '../models/DrinkModel.js';
+import Cupom from '../models/CupomModel.js';
 
 const get = async (req, res) => {
   try {
@@ -39,58 +41,116 @@ const get = async (req, res) => {
 };
 
 const create = async (corpo) => {
-  try {
-      const {
-          status,
-          total,
-          totalDiscount,
-          idUserCostumer,
-          idUserDelivery,
-          idAddress,
-          idCupom,
-          idPayment,
-          products 
-      } = corpo;
+    try {
+        const {
+            status,
+            idUserCostumer,
+            idUserDelivery,
+            idAddress,
+            idCupom, 
+            idPayment,
+            products,
+            drinks
+        } = corpo;
 
-      const order = await Order.create({
-          status,
-          total,
-          totalDiscount,
-          idUserCostumer,
-          idUserDelivery,
-          idAddress,
-          idCupom,
-          idPayment
-      });
+        let calculatedTotal = 0;
+        const orderItemsToCreate = [];
+        let finalTotalDiscount = 0;
 
-      if (products && products.length > 0) {
-          const orderProducts = [];
+        if (products && products.length > 0) {
+            for (const productItem of products) {
+                const { idProduct, quantity } = productItem;
 
-          for (const product of products) {
-              const { idProduct, quantity } = product;
+                if (!idProduct || !quantity || quantity <= 0) {
+                    throw new Error('Dados inválidos para produto: idProduct e quantity são obrigatórios e quantity deve ser maior que 0.');
+                }
 
-              const productData = await Product.findOne({ where: { id: idProduct } });
+                const productData = await Product.findOne({ where: { id: idProduct } });
 
-              if (!productData) {
-                  throw new Error(`Produto com ID ${idProduct} não encontrado`);
-              }
+                if (!productData) {
+                    throw new Error(`Produto com ID ${idProduct} não encontrado`);
+                }
 
-              orderProducts.push({
-                  idOrder: order.id,
-                  idProduct,
-                  quantity,
-                  priceProducts: productData.price 
-              });
-          }
+                const itemPrice = parseFloat(productData.price);
+                calculatedTotal += itemPrice * quantity;
 
-          await OrderProduct.bulkCreate(orderProducts);
-      }
+                orderItemsToCreate.push({
+                    idProduct: idProduct,
+                    quantity: quantity,
+                    priceProducts: itemPrice,
+                    idDrink: null
+                });
+            }
+        }
 
-      return order;
-  } catch (error) {
-      throw new Error(error.message);
-  }
+        if (drinks && drinks.length > 0) {
+            for (const drinkItem of drinks) {
+                const { idDrink, quantity } = drinkItem;
+
+                if (!idDrink || !quantity || quantity <= 0) {
+                    throw new Error('Dados inválidos para bebida: idDrink e quantity são obrigatórios e quantity deve ser maior que 0.');
+                }
+
+                const drinkData = await Drink.findOne({ where: { id: idDrink } });
+
+                if (!drinkData) {
+                    throw new Error(`Bebida com ID ${idDrink} não encontrada`);
+                }
+
+                const itemPrice = parseFloat(drinkData.price);
+                calculatedTotal += itemPrice * quantity;
+
+                orderItemsToCreate.push({
+                    idProduct: null,
+                    quantity: quantity,
+                    priceProducts: itemPrice,
+                    idDrink: idDrink
+                });
+            }
+        }
+
+        if (idCupom) {
+            const cupomData = await Cupom.findOne({ where: { id: idCupom } });
+
+            if (!cupomData) {
+                throw new Error(`Cupom com ID ${idCupom} não encontrado.`);
+            }
+            
+            const discountValue = parseFloat(cupomData.value); 
+            
+            if (!isNaN(discountValue) && discountValue > 0) {
+                finalTotalDiscount = discountValue;
+                calculatedTotal -= finalTotalDiscount;
+                if (calculatedTotal < 0) calculatedTotal = 0;
+            }
+        }
+
+        const order = await Order.create({
+            status,
+            total: calculatedTotal,
+            totalDiscount: finalTotalDiscount, 
+            idUserCostumer,
+            idUserDelivery,
+            idAddress,
+            idCupom,
+            idPayment,
+            idDrink: null
+        });
+
+        if (orderItemsToCreate.length > 0) {
+            const finalOrderItems = orderItemsToCreate.map(item => ({
+                ...item,
+                idOrder: order.id
+            }));
+            await OrderProduct.bulkCreate(finalOrderItems);
+        }
+
+        return order;
+    } catch (error) {
+        throw new Error(error.message);
+    }
 };
+
 
 const update = async (corpo, id) => {
   try {
@@ -103,7 +163,8 @@ const update = async (corpo, id) => {
           idAddress,
           idCupom,
           idPayment,
-          products 
+          products,
+          idDrink
       } = corpo;
 
       const order = await Order.findOne({ where: { id } });
@@ -120,6 +181,7 @@ const update = async (corpo, id) => {
       if (idAddress !== undefined) order.idAddress = idAddress;
       if (idCupom !== undefined) order.idCupom = idCupom;
       if (idPayment !== undefined) order.idPayment = idPayment;
+      if (idDrink !== undefined) order.idDrink = idDrink;
 
       await order.save();
 
@@ -151,6 +213,7 @@ const update = async (corpo, id) => {
                       idOrder: order.id,
                       idProduct,
                       quantity,
+                      idDrink,
                       priceProducts: productData.price
                   });
               }

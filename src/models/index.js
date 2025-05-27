@@ -6,6 +6,7 @@ import Adress from "./AddressModel.js";
 import Payment from "./PaymentModel.js";
 import Order from "./OrderModel.js";
 import OrderProduct from "./OrderProductModel.js";
+import Drink from "./DrinkModel.js";
 
 (async () => {
   try {
@@ -17,6 +18,7 @@ import OrderProduct from "./OrderProductModel.js";
     await Payment.sync({ alter: true });
     await Order.sync({ alter: true });
     await OrderProduct.sync({ alter: true }); 
+    await Drink.sync({ alter: true });
 
     console.log("Tabelas sincronizadas com sucesso!");
   } catch (error) {

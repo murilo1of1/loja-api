@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../config/postgres.js";
 import Order from "./OrderModel.js";
 import Product from "./ProductModel.js";
+import Drink from "./DrinkModel.js";
 
 const OrderProduct = sequelize.define(
   'order_products',
@@ -48,6 +49,17 @@ OrderProduct.belongsTo(Product, {
       name: 'idProduct',
       allowNull: true,
       field: 'id_product',
+    }
+});
+
+OrderProduct.belongsTo(Drink, {
+    as: 'drink',
+    onUpdate: 'NO ACTION',
+    onDelete: 'NO ACTION',
+    foreignKey: {
+      name: 'idDrink',
+      allowNull: true,
+      field: 'id_drink',
     }
 });
 

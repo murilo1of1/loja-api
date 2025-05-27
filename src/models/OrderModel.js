@@ -85,7 +85,7 @@ Order.belongsTo(Cupom, {
     allowNull: true,
     foreignKey: {
       name: 'idCupom',
-      field: 'id_Cupom',
+      field: 'id_cupom',
     }
 });
 
