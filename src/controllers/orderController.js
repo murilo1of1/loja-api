@@ -307,50 +307,6 @@ const acceptOrder = async (req, res) => {
   }
 };
 
-const completeOrder = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const order = await Order.findOne({ where: { id } });
-    if (!order) {
-      return res.status(404).send({ message: 'Pedido não encontrado' });
-    }
-
-    if (order.status !== 'in_delivery') {
-      return res.status(400).send({ message: 'Pedido não está em entrega' });
-    }
-
-    order.status = 'delivered';
-    await order.save();
-
-    return res.status(200).send({ message: 'Entrega confirmada com sucesso', data: order });
-  } catch (error) {
-    return res.status(500).send({ message: error.message });
-  }
-};
-
-const cancelOrder = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const order = await Order.findOne({ where: { id } });
-    if (!order) {
-      return res.status(404).send({ message: 'Pedido não encontrado' });
-    }
-
-    if (order.status !== 'pending') {
-      return res.status(400).send({ message: 'Apenas pedidos pendentes podem ser cancelados' });
-    }
-
-    order.status = 'cancelled';
-    await order.save();
-
-    return res.status(200).send({ message: 'Pedido cancelado com sucesso', data: order });
-  } catch (error) {
-    return res.status(500).send({ message: error.message });
-  }
-};
-
 const getPendingOrders = async (req, res) => {
   try {
     const orders = await Order.findAll({ where: { status: 'pending' } });
@@ -362,7 +318,11 @@ const getPendingOrders = async (req, res) => {
 
 const getCustomerOrders = async (req, res) => {
   try {
-    const { idUserCostumer } = req.user; 
+    const idUserCostumer = req.params.idUserCostumer;
+
+    if (!idUserCostumer) {
+      return res.status(400).send({ message: 'Informe o id do usuário' });
+    }
 
     const orders = await Order.findAll({ where: { idUserCostumer } });
     return res.status(200).send({ message: 'Histórico de pedidos encontrado', data: orders });
@@ -371,4 +331,4 @@ const getCustomerOrders = async (req, res) => {
   }
 };
 
-export default { get, persist, destroy, acceptOrder, completeOrder, cancelOrder, getPendingOrders, getCustomerOrders }; 
+export default { get, persist, destroy, getPendingOrders, getCustomerOrders }; 

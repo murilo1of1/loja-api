@@ -17,7 +17,7 @@ const get = async (req, res) => {
 
         const response = await Address.findOne({
             where: {
-                id: id
+                idUser: id
             }
         });
 
@@ -69,7 +69,7 @@ const update = async (corpo, id) => {
     try {
         const response = await Address.findOne({
             where: {
-                id
+                idUser: id
             }
         });
 
